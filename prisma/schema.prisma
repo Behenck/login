@@ -20,6 +20,7 @@ model User {
   accounts           Account[]
   invites            Invite[]
   member_on          Member[]
+  refreshTokens      RefreshToken[]
   owns_organizations Organization[]
 
   @@map("users")
@@ -27,6 +28,11 @@ model User {
 
 enum TokenType {
   PASSWORD_RECOVERY
+}
+
+enum RefreshTokenStatus {
+  ACTIVE
+  REVOKED
 }
 
 model Token {
@@ -38,6 +44,18 @@ model Token {
   userId String? @map("user_id")
 
   @@map("tokens")
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  revoked   Boolean  @default(false)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String? @map("user_id")
+
+  @@map("refresh_tokens")
 }
 
 enum AccountProvider {
