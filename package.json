@@ -1,5 +1,5 @@
 {
-  "name": "finax-web-api",
+  "name": "finax-auth",
   "private": true,
   "scripts": {
     "dev": "turbo run dev",
