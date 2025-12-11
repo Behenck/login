@@ -40,7 +40,7 @@ app.setSerializerCompiler(serializerCompiler)
 app.register(fastifyCors, {
   origin: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  // credentials: true, // envie automaticamente os cookies (auth via sessões)
+  credentials: true, // envie automaticamente os cookies (auth via sessões)
 })
 
 app.register(fastifySwagger, {
