@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { Header } from "../header";
 
 interface MainLayoutProps {
   children: ReactNode
@@ -7,9 +8,7 @@ interface MainLayoutProps {
 export function MainLayout({children}: MainLayoutProps) {
   return (
     <>
-      <header>
-        <h1>Navbar</h1>
-      </header>
+      <Header />
       <main>
         {children}
       </main>
