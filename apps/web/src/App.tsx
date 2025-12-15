@@ -7,6 +7,7 @@ import { SettingsPage } from "./pages/settings";
 import { MembersPage } from "./pages/settings/members";
 import { GeneralPage } from "./pages/settings/general";
 import { OrganizationPage } from "./pages/settings/organization";
+import { AcceptInvite } from "./pages/invites/accept-invite";
 
 export function App() {
   return (
@@ -14,6 +15,7 @@ export function App() {
       {/* Rotas públicas */}
       <Route element={<PublicRoute />}>
         <Route path="login" element={<LoginPage />} />
+        <Route path="invites/:inviteId/accept" element={<AcceptInvite />} />
       </Route>
       
       {/* Rotas protegidas */}
