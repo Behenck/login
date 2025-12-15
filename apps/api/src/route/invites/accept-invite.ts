@@ -10,7 +10,6 @@ import { BadRequestError } from '../_errors/bad-request-error'
 export async function acceptInvite(app: FastifyInstance) {
   app
     .withTypeProvider<ZodTypeProvider>()
-    .register(auth)
     .post(
       '/invites/:inviteId/accept',
       {
@@ -18,7 +17,7 @@ export async function acceptInvite(app: FastifyInstance) {
           tags: ['invites'],
           summary: 'Accept an invite',
           params: z.object({
-            inviteId: z.string().uuid(),
+            inviteId: z.uuid(),
           }),
           response: {
             204: z.null(),
@@ -27,7 +26,6 @@ export async function acceptInvite(app: FastifyInstance) {
       },
       async (request, reply) => {
         const { inviteId } = request.params
-        const userId = await request.getCurrentUserId()
 
         const invite = await prisma.invite.findUnique({
           where: { id: inviteId },
@@ -37,12 +35,16 @@ export async function acceptInvite(app: FastifyInstance) {
           throw new BadRequestError('Invite not found or expired')
         }
 
-        const user = await prisma.user.findUnique({
-          where: { id: userId },
+        let user = await prisma.user.findUnique({
+          where: { email: invite.email },
         })
 
         if (!user) {
-          throw new BadRequestError('User not found.')
+          user = await prisma.user.create({
+            data: {
+              email: invite.email,
+            }
+          })
         }
 
         if (invite.email !== user.email) {
@@ -52,7 +54,7 @@ export async function acceptInvite(app: FastifyInstance) {
         await prisma.$transaction([
           prisma.member.create({
             data: {
-              userId,
+              userId: user.id,
               organizationId: invite.organizationId,
               role: invite.role,
             },
