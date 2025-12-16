@@ -1,5 +1,3 @@
 export function OrganizationPage() {
-  return (
-    <h1>organization page</h1>
-  )
+	return <h1>organization page</h1>;
 }

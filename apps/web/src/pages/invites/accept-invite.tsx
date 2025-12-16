@@ -1,86 +1,251 @@
-import { Card } from "@/components/ui/card";
-import Logo from "@/assets/finax-logo.svg"
 import { Button } from "@/components/ui/button";
+import {
+	ArrowLeft,
+	Building2,
+	CheckCheck,
+	Loader2,
+	UserPlus,
+} from "lucide-react";
+import { Input } from "@/components/ui/input";
+import Logo from "@/assets/finax-logo.svg";
 import { useEffect, useState } from "react";
+import { Link, redirect, useNavigate, useParams } from "react-router-dom";
+import type { Invite } from "@/@types/invite";
 import { api } from "@/lib/axios";
-import { useParams } from "react-router-dom";
+import { Controller, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import z from "zod";
+import {
+	Field,
+	FieldError,
+	FieldGroup,
+	FieldLabel,
+} from "@/components/ui/field";
 
-interface Invite {
-  author: {
-    id: string
-    name: string
-    avatarUrl: string
-  }
-  email: string
-  id: string
-  role: string
-  organization: {
-    name: string
-  }
-  createdAt: Date
-}
+const CreateMemberSchema = z
+	.object({
+		name: z.string().min(3, { error: "Mínimo 3 caracteres!" }),
+		lastName: z.string().min(3, { error: "Mínimo 3 caracteres!" }),
+		password: z
+			.string()
+			.min(6, { error: "A senha deve ter no mínimo 6 caracteres!" }),
+		confirmPassword: z
+			.string()
+			.min(6, { error: "A confirmação de senha deve ter no mínimo 6 caracteres." }),
+	})
+	.required()
+  .refine((data) => data.password === data.confirmPassword, {
+    path: ["confirmPassword"],
+    message: "As senhas não conferem.",
+  });
+
+export type CreateMemberType = z.infer<typeof CreateMemberSchema>;
 
 export function AcceptInvite() {
-  const { inviteId } = useParams();
-  const [invite, setInvite] = useState<Invite | null>(null);
+	const { inviteId } = useParams();
+	const navigate = useNavigate();
+	const [isLoading, setIsLoading] = useState(true);
+	const [invite, setInvite] = useState<Invite | null>(null);
 
-  useEffect(() => {
-    const getInvite = async () => {
-      const { data } = await api.get(`/invites/${inviteId}`);
-      setInvite(data.invite);
-    };
+	const {
+		handleSubmit,
+		register,
+		resetField,
+		control,
+	} = useForm<CreateMemberType>({
+		resolver: zodResolver(CreateMemberSchema),
+		defaultValues: {
+			name: "",
+			lastName: "",
+			password: "",
+			confirmPassword: "",
+		},
+	});
 
-    if (inviteId) getInvite();
-  }, [inviteId]);
+	useEffect(() => {
+		const getInvite = async () => {
+			const { data } = await api.get(`/invites/${inviteId}`);
+			if (!data?.invite) {
+				navigate("/invites", { replace: true });
+				return;
+			}
+			setIsLoading(false);
+			setInvite(data.invite);
+		};
 
-  if (!invite) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Card className="px-10 py-8 max-w-lg w-full">
-          Carregando convite...
-        </Card>
-      </div>
-    );
-  }
+		if (inviteId) getInvite();
+		if (!inviteId) redirect("/login");
+	}, [inviteId]);
 
-  return (
-    <div className="flex items-center justify-center min-h-screen">
-      <Card className="px-10 flex flex-col justify-center gap-6 max-w-lg">
-        <img src={Logo} className="w-22 h-22 mx-auto" alt="Logo Finax" />
+	const onsSubmit = async (data: CreateMemberType) => {};
 
-        <div className="space-y-2 px-12 text-center">
-          <h1 className="text-2xl font-bold">Você foi convidado</h1>
+	return (
+		<div className="flex justify-between h-screen">
+			<div className="relative flex-1 flex items-center justify-center">
+				<img src={Logo} className="opacity-20 blur-md" alt="" />
+			</div>
+			<div className="w-xl bg-zinc-900 p-8 flex flex-col items-center justify-center">
+				{!isLoading && invite ? (
+					<div className="space-y-6 w-full max-w-md text-white">
+						<div className="mx-auto bg-zinc-800 w-12 h-12 rounded-full flex items-center justify-center">
+							<CheckCheck className="text-green-600" />
+						</div>
 
-          <div>
-            <span className="text-muted-foreground text-sm text-justify block">
-              A equipe da{" "}
-              <span className="text-foreground">{invite.organization.name}</span>{" "}
-              convidou você para colaborar no sistema. Confirme seus dados abaixo
-            </span>
-            <span className="text-muted-foreground text-sm text-center block">
-              para ganhar acesso.
-            </span>
-          </div>
-        </div>
+						<div className="text-center">
+							<h1 className="text-3xl font-bold">Convite Válido!</h1>
+							<span className="text-gray-400 text-sm">
+								Você foi convidado para se juntar à rede
+							</span>
+						</div>
 
-        <div className="flex flex-col text-sm border rounded p-3 border-l-[5px] border-l-green-500">
-          <span className="text-muted-foreground">Acessando como:</span>
-          <span className="font-bold text-foreground">{invite.email}</span>
-        </div>
+						<div className="flex gap-4 items-center bg-zinc-800 p-4 rounded-lg">
+							<Building2 className="w-10 h-10" />
+							<div className="flex flex-col">
+								<p className="font-medium">{invite.organization.name}</p>
+								<span className="text-sm text-gray-400">
+									Convidado por: Denilson
+								</span>
+								<span className="text-sm text-green-400 font-medium">
+									Bem-vindo(a) {invite.email}! Defina sua senha para acessar a
+									rede.
+								</span>
+							</div>
+						</div>
 
-        <Button className="h-10 bg-green-700 hover:bg-green-800 text-white cursor-pointer">
-          Aceitar convite e entrar
-        </Button>
+						<form
+							onSubmit={handleSubmit(onsSubmit)}
+							noValidate
+							className="space-y-4"
+						>
+							<div className="flex gap-2">
+								<FieldGroup>
+									<Controller
+										name="name"
+										control={control}
+										render={({ field, fieldState }) => (
+											<Field data-invalid={fieldState.invalid}>
+												<FieldLabel>Nome</FieldLabel>
+												<Input
+													{...field}
+													id="name"
+													aria-invalid={fieldState.invalid}
+													placeholder="Seu nome"
+													autoComplete="off"
+												/>
+												{fieldState.invalid && (
+													<FieldError errors={[fieldState.error]} />
+												)}
+											</Field>
+										)}
+									/>
+								</FieldGroup>
+								<FieldGroup>
+									<Controller
+										name="lastName"
+										control={control}
+										render={({ field, fieldState }) => (
+											<Field data-invalid={fieldState.invalid}>
+												<FieldLabel>Sobrenome</FieldLabel>
+												<Input
+													{...field}
+													id="lastName"
+													aria-invalid={fieldState.invalid}
+													placeholder="Seu sobrenome"
+													autoComplete="off"
+												/>
+												{fieldState.invalid && (
+													<FieldError errors={[fieldState.error]} />
+												)}
+											</Field>
+										)}
+									/>
+								</FieldGroup>
+							</div>
+							<FieldGroup>
+								<Controller
+									name="password"
+									control={control}
+									render={({ field, fieldState }) => (
+										<Field data-invalid={fieldState.invalid}>
+											<FieldLabel>Senha</FieldLabel>
+											<Input
+												{...field}
+												id="password"
+												aria-invalid={fieldState.invalid}
+												placeholder="Mínimo 6 caracteres"
+                        type="password"
+												autoComplete="off"
+											/>
+											{fieldState.invalid && (
+												<FieldError errors={[fieldState.error]} />
+											)}
+										</Field>
+									)}
+								/>
+							</FieldGroup>
+							<FieldGroup>
+								<Controller
+									name="confirmPassword"
+									control={control}
+									render={({ field, fieldState }) => (
+										<Field data-invalid={fieldState.invalid}>
+											<FieldLabel>Confirmar Senha</FieldLabel>
+											<Input
+												{...field}
+												id="confirmPassword"
+												aria-invalid={fieldState.invalid}
+												placeholder="Confirme sua senha"
+                        type="password"
+												autoComplete="off"
+											/>
+											{fieldState.invalid && (
+												<FieldError errors={[fieldState.error]} />
+											)}
+										</Field>
+									)}
+								/>
+							</FieldGroup>
+							<div className="space-y-2">
+								<Button
+									type="submit"
+									className="w-full bg-green-700 hover:bg-green-800 text-white cursor-pointer"
+								>
+									Aceitar Convite
+								</Button>
+								<Button
+									type="button"
+									variant="outline"
+									className="w-full cursor-pointer"
+									asChild
+								>
+									<Link to="/invites">
+										<ArrowLeft />
+										Voltar
+									</Link>
+								</Button>
+							</div>
+						</form>
+					</div>
+				) : (
+					<div className="space-y-4 w-full max-w-md text-white">
+						<div className="mx-auto bg-white w-12 h-12 rounded-full flex items-center justify-center">
+							<UserPlus className="text-zinc-900" />
+						</div>
 
-        <div className="flex flex-col gap-0">
-          <span className="text-center text-sm text-muted-foreground">
-            Não é você ou não esperava esse convite?
-          </span>
-          <Button variant="link" className="underline h-5 cursor-pointer text-sm" size="sm">
-            Recusar convite
-          </Button>
-        </div>
-      </Card>
-    </div>
-  );
+						<div className="text-center">
+							<h1 className="text-3xl font-bold">Validando Convite</h1>
+							<span className="text-gray-400 text-sm">
+								Aguarde enquanto validamos seu convite...
+							</span>
+						</div>
+
+						<div className="space-y-2 mt-10 flex flex-col items-center justify-center">
+							<Loader2 className="animate-spin w-6 h-6" />
+							<span className="text-gray-400">Validando convite...</span>
+						</div>
+					</div>
+				)}
+			</div>
+		</div>
+	);
 }

@@ -3,15 +3,15 @@ import Cookies from "js-cookie";
 import { AuthLayout } from "@/components/layouts/auth-layout";
 
 export function PublicRoute() {
-  const token = Cookies.get("token");
+	const token = Cookies.get("token");
 
-  if (token) {
-    return <Navigate to="/" replace />;
-  }
+	// if (token) {
+	//   return <Navigate to="/" replace />;
+	// }
 
-  return (
-    <AuthLayout>
-      <Outlet />
-    </AuthLayout>
-  );
+	return (
+		<AuthLayout>
+			<Outlet />
+		</AuthLayout>
+	);
 }

@@ -7,29 +7,39 @@ import { SettingsPage } from "./pages/settings";
 import { MembersPage } from "./pages/settings/members";
 import { GeneralPage } from "./pages/settings/general";
 import { OrganizationPage } from "./pages/settings/organization";
+import { ValidateInvite } from "./pages/invites/validate-invite";
 import { AcceptInvite } from "./pages/invites/accept-invite";
+import { VerifyEmailInvite } from "./pages/invites/verify-email-invite";
 
 export function App() {
-  return (
-    <Routes>
-      {/* Rotas públicas */}
-      <Route element={<PublicRoute />}>
-        <Route path="login" element={<LoginPage />} />
-        <Route path="invites/:inviteId/accept" element={<AcceptInvite />} />
-      </Route>
-      
-      {/* Rotas protegidas */}
-      <Route element={<PrivateRoute />}>
-        <Route path="/" element={<HomePage />} />
-        <Route path="settings" element={<SettingsPage />}>
-          <Route index element={<GeneralPage />}/>
-          <Route path="members" element={<MembersPage />} />
-          <Route path="organization" element={<OrganizationPage />} />
-        </Route>
-      </Route>
+	return (
+		<Routes>
+			{/* Rotas públicas */}
+			<Route element={<PublicRoute />}>
+				<Route path="login" element={<LoginPage />} />
+			</Route>
 
-      {/* Rota desconhecida */}
-      <Route path="*" element={<Navigate to="/" />} />
-    </Routes>
-  )
+			{/* Rotas protegidas */}
+			<Route element={<PrivateRoute />}>
+				<Route path="/" element={<HomePage />} />
+				<Route path="settings" element={<SettingsPage />}>
+					<Route index element={<GeneralPage />} />
+					<Route path="members" element={<MembersPage />} />
+					<Route path="organization" element={<OrganizationPage />} />
+				</Route>
+			</Route>
+
+			<Route path="invites" element={<ValidateInvite />} />
+			<Route path="invites/:inviteId" element={<ValidateInvite />} />
+			<Route path="invites/:inviteId/validate" element={<ValidateInvite />} />
+			<Route path="invites/:inviteId/accept" element={<AcceptInvite />} />
+			<Route
+				path="invites/:inviteId/verify-email"
+				element={<VerifyEmailInvite />}
+			/>
+
+			{/* Rota desconhecida */}
+			<Route path="*" element={<Navigate to="/" />} />
+		</Routes>
+	);
 }
