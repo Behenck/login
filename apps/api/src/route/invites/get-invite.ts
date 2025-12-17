@@ -21,7 +21,7 @@ export async function getInvite(app: FastifyInstance) {
           200: z.object({
             invite: z.object({
               id: z.uuid(),
-              email: z.email(),
+              email: z.email().nullable(),
               role: roleSchema,
               createdAt: z.date(),
               author: z

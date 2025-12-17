@@ -4,7 +4,7 @@ export interface Invite {
 		name: string;
 		avatarUrl: string;
 	};
-	email: string;
+	email?: string;
 	id: string;
 	role: string;
 	organization: {

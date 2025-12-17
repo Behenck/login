@@ -32,6 +32,7 @@ import { getMembers } from './route/members/get-members'
 import { removeMember } from './route/members/remove-member'
 import { updateMember } from './route/members/update-member'
 import { verifyEmailOTP } from './route/auth/verify-email-otp'
+import { createInviteLink } from './route/invites/create-invite-link'
 
 const app = fastify().withTypeProvider<ZodTypeProvider>()
 
@@ -114,6 +115,7 @@ app.register(shutdownOrganization)
 /* Invites */
 app.register(acceptInvite)
 app.register(createInvite)
+app.register(createInviteLink)
 app.register(getInvite)
 app.register(getInvites)
 app.register(getPendingInvites)
