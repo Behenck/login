@@ -9,7 +9,7 @@ import { GeneralPage } from "./pages/settings/general";
 import { OrganizationPage } from "./pages/settings/organization";
 import { ValidateInvite } from "./pages/invites/validate-invite";
 import { AcceptInvite } from "./pages/invites/accept-invite";
-import { VerifyEmailInvite } from "./pages/invites/verify-email-invite";
+import { VerifyEmailOTP } from "./pages/auth/verify-email-otp";
 
 export function App() {
 	return (
@@ -34,8 +34,8 @@ export function App() {
 			<Route path="invites/:inviteId/validate" element={<ValidateInvite />} />
 			<Route path="invites/:inviteId/accept" element={<AcceptInvite />} />
 			<Route
-				path="invites/verify-email"
-				element={<VerifyEmailInvite />}
+				path="verify-email"
+				element={<VerifyEmailOTP />}
 			/>
 
 			{/* Rota desconhecida */}

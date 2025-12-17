@@ -93,7 +93,7 @@ export function AcceptInvite() {
 			resetField("password");
     	resetField("confirmPassword");
 
-			navigate(`invites/verify-email`)
+			navigate(`/verify-email?email=${invite?.email}`)
 		}
 	};
 

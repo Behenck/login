@@ -8,9 +8,12 @@ import {
   InputOTPSlot,
 } from "@/components/ui/input-otp"
 import Logo from "@/assets/finax-logo.svg";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 
-export function VerifyEmailInvite() {
+export function VerifyEmailOTP() {
+	const [searchParams] = useSearchParams()
+	const email = searchParams.get("email")
+
 	return (
 		<div className="flex justify-between h-screen">
 			<div className="relative flex-1 flex items-center justify-center">
@@ -29,7 +32,7 @@ export function VerifyEmailInvite() {
 							<span className="text-gray-400 text-sm">
 								Enviamos um código de 6 dígitos para
 							</span>
-							<span className="text-sm font-bold">denilson@akorgrupo.com</span>
+							<span className="text-sm font-bold">{email}</span>
 						</div>
 					</div>
 
