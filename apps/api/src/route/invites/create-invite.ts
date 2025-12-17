@@ -7,6 +7,7 @@ import z from "zod";
 import { UnauthorizedError } from "../_errors/unauthorized-error";
 import { BadRequestError } from "../_errors/bad-request-error";
 import { prisma } from "@/lib/prisma";
+import { Resend } from 'resend';
 
 export async function createInvite(app: FastifyInstance) {
   app.withTypeProvider<ZodTypeProvider>()
@@ -24,9 +25,7 @@ export async function createInvite(app: FastifyInstance) {
           role: roleSchema
         }),
         response: {
-          201: z.object({
-            inviteId: z.uuid()
-          })
+          201: z.null()
         }
       }
     },
@@ -91,9 +90,16 @@ export async function createInvite(app: FastifyInstance) {
         }
       })
 
-      return reply.status(201).send({
-        inviteId: invite.id
-      })
+      const resend = new Resend(process.env.RESEND_API_KEY);
+
+      resend.emails.send({
+        from: "denilsontrespa10@gmail.com",
+        to: email,
+        subject: 'Convite',
+        html: `<p>Congrats on sending your <strong>${invite.id}</strong>!</p>`
+      });
+
+      return reply.status(201).send()
     }
   )
 }

@@ -9,7 +9,7 @@ import {
 import { Input } from "@/components/ui/input";
 import Logo from "@/assets/finax-logo.svg";
 import { useEffect, useState } from "react";
-import { Link, redirect, useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import type { Invite } from "@/@types/invite";
 import { api } from "@/lib/axios";
 import { Controller, useForm } from "react-hook-form";
@@ -21,6 +21,7 @@ import {
 	FieldGroup,
 	FieldLabel,
 } from "@/components/ui/field";
+import { toast } from "sonner";
 
 const CreateMemberSchema = z
 	.object({
@@ -49,7 +50,6 @@ export function AcceptInvite() {
 
 	const {
 		handleSubmit,
-		register,
 		resetField,
 		control,
 		watch,
@@ -65,20 +65,29 @@ export function AcceptInvite() {
 
 	const name = watch("name")
 
-	useEffect(() => {
-		const getInvite = async () => {
-			const { data } = await api.get(`/invites/${inviteId}`);
-			if (!data?.invite) {
-				navigate("/invites", { replace: true });
-				return;
-			}
-			setIsLoading(false);
-			setInvite(data.invite);
-		};
+	async function validate(code: string) {
+    const token = code.trim();
 
-		if (inviteId) getInvite();
-		if (!inviteId) redirect("/login");
-	}, [inviteId]);
+    if (!token) {
+      toast.error("Informe o token do convite.");
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      const { data } = await api.get(`/invites/${token}`);
+			setInvite(data.invite)
+    } catch {
+      toast.error("Convite inválido ou expirado!");
+			navigate(`/invites/${token}/validate`, { replace: true });
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    if (inviteId) validate(inviteId);
+  }, [inviteId]);
 
 	const onsSubmit = async (data: CreateMemberType) => {
 		setIsLoading(true);

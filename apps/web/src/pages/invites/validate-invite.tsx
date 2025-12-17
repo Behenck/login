@@ -58,7 +58,7 @@ export function ValidateInvite() {
 			<div className="w-xl bg-zinc-900 p-8 flex flex-col items-center justify-center">
 				<div className="space-y-4 w-full max-w-md text-white">
 					<div className="mx-auto bg-zinc-800 w-12 h-12 rounded-full flex items-center justify-center">
-						<UserPlus className="text-zinc-900" />
+						<UserPlus className="text-white" />
 					</div>
 
 					<div className="text-center">

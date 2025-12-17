@@ -22,27 +22,13 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { OrganizationMembers } from "../members/organization-members";
 import { InviteMemberWithEmailAndRole } from "./invite-member-with-email-and-role";
+import { InviteMemberLink } from "./invite-member-link";
 
 export function MembersPage() {
 	return (
 		<div className="p-4 space-y-8">
 			<div className="grid grid-cols-2">
-				<div className="space-y-2">
-					<div>
-						<h2>Convidar membro</h2>
-						<span className="text-muted-foreground text-sm">
-							Convidar membro via email
-						</span>
-					</div>
-					<Button
-						variant="outline"
-						className="cursor-pointer bg-transparent!"
-						size="sm"
-					>
-						<Link />
-						<span>Convidar via link</span>
-					</Button>
-				</div>
+				<InviteMemberLink />
 				<InviteMemberWithEmailAndRole />
 			</div>
 

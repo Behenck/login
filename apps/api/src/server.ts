@@ -31,6 +31,7 @@ import { revokeInvite } from './route/invites/revoke-invite'
 import { getMembers } from './route/members/get-members'
 import { removeMember } from './route/members/remove-member'
 import { updateMember } from './route/members/update-member'
+import { verifyEmailOTP } from './route/auth/verify-email-otp'
 
 const app = fastify().withTypeProvider<ZodTypeProvider>()
 
@@ -100,6 +101,7 @@ app.register(refreshTokenRoute)
 app.register(requestPasswordRecover)
 app.register(resetPassword)
 app.register(getProfile)
+app.register(verifyEmailOTP)
 
 /*  Orgs  */
 app.register(createOrganization)

@@ -17,6 +17,15 @@ export function App() {
 			{/* Rotas públicas */}
 			<Route element={<PublicRoute />}>
 				<Route path="login" element={<LoginPage />} />
+				<Route
+					path="verify-email"
+					element={<VerifyEmailOTP />}
+				/>
+				
+				<Route path="invites" element={<ValidateInvite />} />
+				<Route path="invites/:inviteId" element={<ValidateInvite />} />
+				<Route path="invites/:inviteId/validate" element={<ValidateInvite />} />
+				<Route path="invites/:inviteId/accept" element={<AcceptInvite />} />
 			</Route>
 
 			{/* Rotas protegidas */}
@@ -28,16 +37,6 @@ export function App() {
 					<Route path="organization" element={<OrganizationPage />} />
 				</Route>
 			</Route>
-
-			<Route path="invites" element={<ValidateInvite />} />
-			<Route path="invites/:inviteId" element={<ValidateInvite />} />
-			<Route path="invites/:inviteId/validate" element={<ValidateInvite />} />
-			<Route path="invites/:inviteId/accept" element={<AcceptInvite />} />
-			<Route
-				path="verify-email"
-				element={<VerifyEmailOTP />}
-			/>
-
 			{/* Rota desconhecida */}
 			<Route path="*" element={<Navigate to="/" />} />
 		</Routes>
