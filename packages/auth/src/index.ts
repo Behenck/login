@@ -15,6 +15,7 @@ import { inviteSubject } from './subjects/invite.ts'
 export * from './models/organization'
 export * from './models/user'
 export * from './roles'
+export * from './type-invite.ts'
 
 // type AppAbilities = UserSubject | ProjectSubject | ['manage', 'all']
 const appAbilitiesSchema = z.union([

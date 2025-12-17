@@ -1,6 +1,5 @@
 import { auth } from "@/middleware/auth";
 import { getUserPermissions } from "@/utils/get-user-permissions";
-import { roleSchema } from "@sass/auth";
 import type { FastifyInstance } from "fastify";
 import type { ZodTypeProvider } from "fastify-type-provider-zod";
 import z from "zod";

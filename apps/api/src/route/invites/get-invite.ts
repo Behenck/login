@@ -1,4 +1,4 @@
-import { roleSchema } from '@sass/auth'
+import { roleSchema, typeInviteSchema } from '@sass/auth'
 import { FastifyInstance } from 'fastify'
 import { ZodTypeProvider } from 'fastify-type-provider-zod'
 import z from 'zod'
@@ -23,6 +23,7 @@ export async function getInvite(app: FastifyInstance) {
               id: z.uuid(),
               email: z.email().nullable(),
               role: roleSchema,
+              type: typeInviteSchema,
               createdAt: z.date(),
               author: z
                 .object({
@@ -33,6 +34,7 @@ export async function getInvite(app: FastifyInstance) {
                 .nullable(),
               organization: z.object({
                 name: z.string(),
+                domain: z.string().nullable()
               }),
             }),
           }),
@@ -48,6 +50,7 @@ export async function getInvite(app: FastifyInstance) {
           id: true,
           email: true,
           role: true,
+          type: true,
           createdAt: true,
           author: {
             select: {
@@ -59,6 +62,7 @@ export async function getInvite(app: FastifyInstance) {
           organization: {
             select: {
               name: true,
+              domain: true
             },
           },
         },

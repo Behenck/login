@@ -72,7 +72,7 @@ export async function createInvite(app: FastifyInstance) {
           user: {
             email
           }
-        }
+        },
       })
 
       if (memberWithSameEmail) {
@@ -92,12 +92,25 @@ export async function createInvite(app: FastifyInstance) {
 
       const resend = new Resend(process.env.RESEND_API_KEY);
 
-      resend.emails.send({
-        from: "denilsontrespa10@gmail.com",
-        to: email,
-        subject: 'Convite',
-        html: `<p>Congrats on sending your <strong>${invite.id}</strong>!</p>`
-      });
+      const link = `${process.env.APP_WEB_URL}/invites/${invite.id}/validate`
+
+      const { error } = 
+        await resend.emails.send({
+          to: ["denilsontrespa10@gmail.com"],
+          template: {
+            id: "finax-welcome",
+            variables: {
+              organizationName: organization.name,
+              authorName: "Denilson",
+              link
+            }
+          }
+        });
+
+      if (error) {
+        request.log.error({ error }, "Resend failed to send email")
+        throw new BadRequestError(error.message)
+      }
 
       return reply.status(201).send()
     }

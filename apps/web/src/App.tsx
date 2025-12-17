@@ -10,6 +10,7 @@ import { OrganizationPage } from "./pages/settings/organization";
 import { ValidateInvite } from "./pages/invites/validate-invite";
 import { AcceptInvite } from "./pages/invites/accept-invite";
 import { VerifyEmailOTP } from "./pages/auth/verify-email-otp";
+import { PasswordRecoveryPage } from "./pages/auth/password-recovery";
 
 export function App() {
 	return (
@@ -17,6 +18,7 @@ export function App() {
 			{/* Rotas públicas */}
 			<Route element={<PublicRoute />}>
 				<Route path="login" element={<LoginPage />} />
+				<Route path="password-recovery" element={<PasswordRecoveryPage />} />
 				<Route
 					path="verify-email"
 					element={<VerifyEmailOTP />}

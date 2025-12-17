@@ -1,6 +1,5 @@
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, MailWarning } from "lucide-react";
-import { Label } from "@/components/ui/label";
 import {
   InputOTP,
   InputOTPGroup,

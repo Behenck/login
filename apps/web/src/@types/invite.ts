@@ -7,8 +7,10 @@ export interface Invite {
 	email?: string;
 	id: string;
 	role: string;
+	type: string;
 	organization: {
 		name: string;
+		domain?: string;
 	};
 	createdAt: Date;
 }

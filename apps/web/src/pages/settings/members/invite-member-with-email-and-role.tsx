@@ -30,11 +30,11 @@ export function InviteMemberWithEmailAndRole() {
 
 	const {
 		handleSubmit,
-		resetField,
+		reset,
 		control,
 	} = useForm<InviteMemberType>({
 		resolver: zodResolver(InviteMemberSchema),
-		defaultValues: { role: "SELLER" },
+		defaultValues: { email: "", role: "SELLER" },
 	});
 
 	const onsSubmit = async (data: InviteMemberType) => {
@@ -42,15 +42,13 @@ export function InviteMemberWithEmailAndRole() {
 
 		try {
 			const organizationDomain = "finax-gi";
-			await api
-				.post(`/organizations/${organizationDomain}/invites`, data)
-				.finally(() => {
-					setIsLoading(false);
-					resetField("email");
-				});
+			await api.post(`/organizations/${organizationDomain}/invites`, data)
+			setIsLoading(false);
+			reset({ email: "", role: data.role }); 
 
 			toast.success("Convite enviado com sucesso!")
 		} catch (error) {
+			setIsLoading(false);
 			toast.error((error as any).response.data.message)
 		}
 	};

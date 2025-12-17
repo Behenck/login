@@ -5,16 +5,12 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 export function InviteMemberLink() {
-  const [inviteLink, setInviteLink] = useState("")
-
   async function handleCreateInviteLink() {
     try {
       const organizationDomain = "finax-gi";
       const { data } = await api.post(`/organizations/${organizationDomain}/invites/link`)
 
       if (data.url) {
-        setInviteLink(data.url)
-
         await navigator.clipboard.writeText(data.url);
 
         toast.success("Link copiado para a área de transferência!")
@@ -41,8 +37,6 @@ export function InviteMemberLink() {
         <Link />
         <span>Convidar via link</span>
       </Button>
-
-      {inviteLink ?? (<span>{inviteLink}</span>)}
     </div>
   )
 }

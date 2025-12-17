@@ -27,6 +27,9 @@ const CreateMemberSchema = z
 	.object({
 		name: z.string().min(3, { error: "Mínimo 3 caracteres!" }),
 		lastName: z.string().min(3, { error: "Mínimo 3 caracteres!" }),
+		email: z
+      .email()
+			.optional(),
 		password: z
 			.string()
 			.min(6, { error: "A senha deve ter no mínimo 6 caracteres!" }),
@@ -34,7 +37,6 @@ const CreateMemberSchema = z
 			.string()
 			.min(6, { error: "A confirmação de senha deve ter no mínimo 6 caracteres." }),
 	})
-	.required()
   .refine((data) => data.password === data.confirmPassword, {
     path: ["confirmPassword"],
     message: "As senhas não conferem.",
@@ -53,17 +55,21 @@ export function AcceptInvite() {
 		resetField,
 		control,
 		watch,
+		setValue,
+		unregister,
 	} = useForm<CreateMemberType>({
 		resolver: zodResolver(CreateMemberSchema),
 		defaultValues: {
 			name: "",
 			lastName: "",
+			email: "",
 			password: "",
 			confirmPassword: "",
 		},
 	});
 
 	const name = watch("name")
+	const shouldAskEmail = invite?.type === "LINK";
 
 	async function validate(code: string) {
     const token = code.trim();
@@ -89,20 +95,41 @@ export function AcceptInvite() {
     if (inviteId) validate(inviteId);
   }, [inviteId]);
 
+	useEffect(() => {
+		if (!invite) return;
+
+		if (invite.type === "EMAIL") {
+			setValue("email", invite.email ?? "", { shouldValidate: false });
+			unregister("email");
+			resetField("email");
+		} else {
+			setValue("email", "", { shouldValidate: false });
+		}
+	}, [invite, setValue, unregister, resetField]);
+
 	const onsSubmit = async (data: CreateMemberType) => {
 		setIsLoading(true);
 
-		const { confirmPassword, ...payload } = data;
+		const { confirmPassword, ...rest } = data;
+
+		const finalEmail =
+			invite?.type === "EMAIL"
+				? invite.email
+				: rest.email;
+
+		const payload = {
+			...rest,
+			email: finalEmail,
+		};
 
 		try {
-			const response = await api.post(`/invites/${inviteId}/accept`, payload);
-			console.log(response.data.code)
+			await api.post(`/invites/${inviteId}/accept`, payload);
 		} finally {
 			setIsLoading(false);
 			resetField("password");
-    	resetField("confirmPassword");
+			resetField("confirmPassword");
 
-			navigate(`/verify-email?email=${invite?.email}`)
+			navigate(`/verify-email?email=${finalEmail ?? ""}`);
 		}
 	};
 
@@ -142,7 +169,7 @@ export function AcceptInvite() {
 						<form
 							onSubmit={handleSubmit(onsSubmit)}
 							noValidate
-							className="space-y-4"
+							className="space-y-3"
 						>
 							<div className="flex gap-2">
 								<FieldGroup>
@@ -188,6 +215,27 @@ export function AcceptInvite() {
 									/>
 								</FieldGroup>
 							</div>
+							{shouldAskEmail && (
+								<FieldGroup>
+									<Controller
+										name="email"
+										control={control}
+										render={({ field, fieldState }) => (
+											<Field data-invalid={fieldState.invalid}>
+												<FieldLabel>Email</FieldLabel>
+												<Input
+													{...field}
+													id="email"
+													aria-invalid={fieldState.invalid}
+													placeholder="joao.silva@dominio.com"
+													autoComplete="off"
+												/>
+												{fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+											</Field>
+										)}
+									/>
+								</FieldGroup>
+							)}
 							<FieldGroup>
 								<Controller
 									name="password"

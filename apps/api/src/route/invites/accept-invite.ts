@@ -6,6 +6,7 @@ import { hash } from "bcryptjs"
 import { prisma } from "@/lib/prisma"
 import { BadRequestError } from "../_errors/bad-request-error"
 import { generateOTP } from "@/utils/generate-otp"
+import { Resend } from "resend"
 
 export async function acceptInvite(app: FastifyInstance) {
   app.withTypeProvider<ZodTypeProvider>().post(
@@ -19,18 +20,19 @@ export async function acceptInvite(app: FastifyInstance) {
         }),
         body: z.object({
           name: z.string().optional(),
+          email: z.string().email().optional(),
           lastName: z.string().optional(),
           password: z.string().min(6).optional(),
         }),
         response: {
           204: z.null(),
-          200: z.object({ code: z.string() }), // dev only
+          200: z.object({ code: z.string() }),
         },
       },
     },
     async (request, reply) => {
       const { inviteId } = request.params
-      const { name, lastName, password } = request.body
+      const { name, lastName, email, password } = request.body
       const fullName = `${name ?? ""} ${lastName ?? ""}`.trim()
 
       const invite = await prisma.invite.findUnique({
@@ -41,8 +43,21 @@ export async function acceptInvite(app: FastifyInstance) {
         throw new BadRequestError("Convite não existe ou expirado.")
       }
 
+      const finalEmail =
+        invite.type === "EMAIL"
+          ? invite.email
+          : email
+
+      if (!finalEmail) {
+        throw new BadRequestError("Informe o e-mail para aceitar o convite.")
+      }
+
+      if (invite.type === "EMAIL" && invite.email && finalEmail !== invite.email) {
+        throw new BadRequestError("Este convite é válido apenas para o e-mail informado.")
+      }
+
       let user = await prisma.user.findUnique({
-        where: { email: invite.email },
+        where: { email: finalEmail },
       })
 
       if (!user) {
@@ -54,7 +69,7 @@ export async function acceptInvite(app: FastifyInstance) {
 
         user = await prisma.user.create({
           data: {
-            email: invite.email,
+            email: finalEmail,              // ✅ aqui também
             name: fullName || null,
             passwordHash,
           },
@@ -76,7 +91,6 @@ export async function acceptInvite(app: FastifyInstance) {
           },
         }),
 
-        // invalida tokens antigos (se existir)
         prisma.token.updateMany({
           where: {
             userId: user.id,
@@ -100,8 +114,22 @@ export async function acceptInvite(app: FastifyInstance) {
         }),
       ])
 
-      if (process.env.NODE_ENV !== "production") {
-        return reply.status(200).send({ code: otp })
+      const resend = new Resend(process.env.RESEND_API_KEY);
+
+      const { error } = 
+        await resend.emails.send({
+          to: ["denilsontrespa10@gmail.com"],
+          template: {
+            id: "verification-code",
+            variables: {
+              otpCode: otp,
+            }
+          }
+        });
+
+      if (error) {
+        request.log.error({ error }, "Resend failed to send email")
+        throw new BadRequestError(error.message)
       }
 
       return reply.status(204).send()
