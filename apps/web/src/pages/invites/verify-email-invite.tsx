@@ -1,8 +1,14 @@
 import { Button } from "@/components/ui/button";
-import { UserPlus } from "lucide-react";
+import { ArrowLeft, MailWarning, UserPlus } from "lucide-react";
 import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSeparator,
+  InputOTPSlot,
+} from "@/components/ui/input-otp"
 import Logo from "@/assets/finax-logo.svg";
+import { Link } from "react-router-dom";
 
 export function VerifyEmailInvite() {
 	return (
@@ -13,29 +19,71 @@ export function VerifyEmailInvite() {
 			</div>
 			<div className="w-xl bg-zinc-900 p-8 flex flex-col items-center justify-center">
 				<form className="space-y-4 w-full max-w-md text-white">
-					<div className="mx-auto bg-white w-12 h-12 rounded-full flex items-center justify-center">
-						<UserPlus className="text-zinc-900" />
+					<div className="mx-auto bg-zinc-800 w-12 h-12 rounded-full flex items-center justify-center">
+						<MailWarning className="text-green-600" />
 					</div>
 
-					<div className="text-center">
+					<div className="text-center space-y-2">
 						<h1 className="text-3xl font-bold">Verifique seu email</h1>
-						<span className="text-gray-400 text-sm">
-							Digite o token de convite que você recebeu
-						</span>
+						<div className="flex flex-col">
+							<span className="text-gray-400 text-sm">
+								Enviamos um código de 6 dígitos para
+							</span>
+							<span className="text-sm font-bold">denilson@akorgrupo.com</span>
+						</div>
 					</div>
 
 					<div className="space-y-3 mt-8">
-						<div className="space-y-2 w-full">
-							<Label>Token de Convite</Label>
-							<Input
-								placeholder="abc123xyz..."
-								className="border-zinc-700! bg-zinc-800!"
-							/>
+						<div className="flex flex-col gap-2">
+							<Label>Código de verificação</Label>
+							 <InputOTP maxLength={6}>
+								<InputOTPGroup className="gap-3">
+									<InputOTPSlot
+										index={0}
+										className="w-15 h-15 text-xl border rounded-md"
+									/>
+									<InputOTPSlot
+										index={1}
+										className="w-15 h-15 text-xl border rounded-md"
+									/>
+									<InputOTPSlot
+										index={2}
+										className="w-15 h-15 text-xl border rounded-md"
+									/>
+								</InputOTPGroup>
+
+								<InputOTPSeparator />
+
+								<InputOTPGroup className="gap-3">
+									<InputOTPSlot
+										index={3}
+										className="w-15 h-15 text-xl border rounded-md"
+									/>
+									<InputOTPSlot
+										index={4}
+										className="w-15 h-15 text-x border rounded-md"
+									/>
+									<InputOTPSlot
+										index={5}
+										className="w-15 h-15 text-xl border rounded-md"
+									/>
+								</InputOTPGroup>
+							</InputOTP>
+
 						</div>
 
-						<Button className="w-full cursor-pointer bg-green-700 hover:bg-green-800 text-white">
-							Validar Convite
+						<div className="space-y-2">
+							<Button className="w-full cursor-pointer bg-green-700 hover:bg-green-800 text-white">
+							Verificar código
 						</Button>
+
+						<Button variant="outline" className="w-full cursor-pointer" asChild>
+							<Link to="/">
+								<ArrowLeft />
+								Voltar
+							</Link>
+						</Button>
+						</div>
 					</div>
 				</form>
 			</div>

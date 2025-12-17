@@ -8,13 +8,16 @@ datasource db {
 }
 
 model User {
-  id           String   @id @default(uuid())
+  id           String  @id @default(uuid())
   name         String?
-  email        String   @unique
-  passwordHash String?  @map("password_hash")
-  avatarUrl    String?  @map("avatar_url")
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt @map("updated_at")
+  email        String  @unique
+  passwordHash String? @map("password_hash")
+  avatarUrl    String? @map("avatar_url")
+
+  emailVerifiedAt DateTime? @map("email_verified_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   tokens             Token[]
   accounts           Account[]
@@ -28,6 +31,7 @@ model User {
 
 enum TokenType {
   PASSWORD_RECOVERY
+  EMAIL_VERIFICATION
 }
 
 enum RefreshTokenStatus {
@@ -38,11 +42,15 @@ enum RefreshTokenStatus {
 model Token {
   id        String    @id @default(uuid())
   type      TokenType
+  token     String    @unique
+  expiresAt DateTime  @map("expires_at")
+  usedAt    DateTime? @map("used_at")
   createdAt DateTime  @default(now()) @map("created_at")
 
   user   User?  @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId String @map("user_id")
 
+  @@index([userId, type])
   @@map("tokens")
 }
 
@@ -100,6 +108,7 @@ model Member {
   organizationId String       @map("organization_id")
   user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId         String       @map("user_id")
+  active         Boolean      @default(true)
 
   @@unique([organizationId, userId])
   @@map("members")

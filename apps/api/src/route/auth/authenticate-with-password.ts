@@ -25,6 +25,9 @@ export async function authenticateWithPassword(app: FastifyInstance) {
         }),
         401: z.object({
           message: z.string()
+        }),
+        403: z.object({
+          message: z.string()
         })
       }
     },
@@ -37,17 +40,23 @@ export async function authenticateWithPassword(app: FastifyInstance) {
     })
 
     if (!userFromEmail) {
-      return reply.status(401).send({message: "User not found."})
+      return reply.status(401).send({message: "Usuário não encontrado."})
     }
 
     if (userFromEmail.passwordHash == null) {
-      return reply.status(401).send({message: "User does not have a password, use social login"})
+      return reply.status(401).send({message: "O usuário não possui senha, utilize o login social."})
     }
 
     const passwordValid = await compare(password, userFromEmail.passwordHash)
 
     if (!passwordValid) {
-      return reply.status(401).send({message: "Invalid credencials."})
+      return reply.status(401).send({message: "Credenciais inválidas."})
+    }
+
+    if (!userFromEmail.emailVerifiedAt) {
+      return reply.status(403).send({
+        message: "Você precisa verificar seu e-mail antes de acessar o sistema."
+      })
     }
 
     const token = await reply.jwtSign({sub: userFromEmail.id})

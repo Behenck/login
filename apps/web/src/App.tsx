@@ -34,7 +34,7 @@ export function App() {
 			<Route path="invites/:inviteId/validate" element={<ValidateInvite />} />
 			<Route path="invites/:inviteId/accept" element={<AcceptInvite />} />
 			<Route
-				path="invites/:inviteId/verify-email"
+				path="invites/verify-email"
 				element={<VerifyEmailInvite />}
 			/>
 

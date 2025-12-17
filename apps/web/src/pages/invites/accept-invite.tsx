@@ -52,6 +52,7 @@ export function AcceptInvite() {
 		register,
 		resetField,
 		control,
+		watch,
 	} = useForm<CreateMemberType>({
 		resolver: zodResolver(CreateMemberSchema),
 		defaultValues: {
@@ -61,6 +62,8 @@ export function AcceptInvite() {
 			confirmPassword: "",
 		},
 	});
+
+	const name = watch("name")
 
 	useEffect(() => {
 		const getInvite = async () => {
@@ -77,7 +80,22 @@ export function AcceptInvite() {
 		if (!inviteId) redirect("/login");
 	}, [inviteId]);
 
-	const onsSubmit = async (data: CreateMemberType) => {};
+	const onsSubmit = async (data: CreateMemberType) => {
+		setIsLoading(true);
+
+		const { confirmPassword, ...payload } = data;
+
+		try {
+			const response = await api.post(`/invites/${inviteId}/accept`, payload);
+			console.log(response.data.code)
+		} finally {
+			setIsLoading(false);
+			resetField("password");
+    	resetField("confirmPassword");
+
+			navigate(`invites/verify-email`)
+		}
+	};
 
 	return (
 		<div className="flex justify-between h-screen">
@@ -103,10 +121,10 @@ export function AcceptInvite() {
 							<div className="flex flex-col">
 								<p className="font-medium">{invite.organization.name}</p>
 								<span className="text-sm text-gray-400">
-									Convidado por: Denilson
+									Convidado por: {invite.author.name}
 								</span>
 								<span className="text-sm text-green-400 font-medium">
-									Bem-vindo(a) {invite.email}! Defina sua senha para acessar a
+									Bem-vindo(a) {name}! Defina sua senha para acessar a
 									rede.
 								</span>
 							</div>
