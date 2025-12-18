@@ -1,14 +1,14 @@
+import { getCurrentOrg } from "@/auth/auth";
 import { Button } from "@/components/ui/button";
 import { api } from "@/lib/axios";
 import { Link } from "lucide-react";
-import { useState } from "react";
 import { toast } from "sonner";
 
 export function InviteMemberLink() {
   async function handleCreateInviteLink() {
     try {
-      const organizationDomain = "finax-gi";
-      const { data } = await api.post(`/organizations/${organizationDomain}/invites/link`)
+      const organizationSlug = getCurrentOrg()
+      const { data } = await api.post(`/organizations/${organizationSlug}/invites/link`)
 
       if (data.url) {
         await navigator.clipboard.writeText(data.url);

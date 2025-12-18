@@ -116,7 +116,7 @@ model Member {
   user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId         String       @map("user_id")
   active         Boolean      @default(true)
-  isDefault      Boolean      @default(false) @map("is_default")
+  isDefault      Boolean      @default(true) @map("is_default")
 
   @@unique([organizationId, userId])
   @@map("members")

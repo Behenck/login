@@ -7,7 +7,6 @@ import {
 	UserPlus,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import Logo from "@/assets/finax-logo.svg";
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import type { Invite } from "@/@types/invite";
@@ -23,20 +22,21 @@ import {
 } from "@/components/ui/field";
 import { toast } from "sonner";
 import { AuthLayout } from "@/components/layouts/auth-layout";
+import { isAuthenticated } from "@/auth/auth";
 
 const CreateMemberSchema = z
 	.object({
-		name: z.string().min(3, { error: "Mínimo 3 caracteres!" }),
-		lastName: z.string().min(3, { error: "Mínimo 3 caracteres!" }),
+		name: z.string().min(3, { error: "Mínimo 3 caracteres!" }).optional(),
+		lastName: z.string().min(3, { error: "Mínimo 3 caracteres!" }).optional(),
 		email: z
       .email()
 			.optional(),
 		password: z
 			.string()
-			.min(6, { error: "A senha deve ter no mínimo 6 caracteres!" }),
+			.min(6, { error: "A senha deve ter no mínimo 6 caracteres!" }).optional(),
 		confirmPassword: z
 			.string()
-			.min(6, { error: "A confirmação de senha deve ter no mínimo 6 caracteres." }),
+			.min(6, { error: "A confirmação de senha deve ter no mínimo 6 caracteres." }).optional(),
 	})
   .refine((data) => data.password === data.confirmPassword, {
     path: ["confirmPassword"],
@@ -50,6 +50,7 @@ export function AcceptInvite() {
 	const navigate = useNavigate();
 	const [isLoading, setIsLoading] = useState(true);
 	const [invite, setInvite] = useState<Invite | null>(null);
+	const isUserAuthenticated = isAuthenticated()
 
 	const {
 		handleSubmit,
@@ -106,35 +107,56 @@ export function AcceptInvite() {
 		} else {
 			setValue("email", "", { shouldValidate: false });
 		}
+
+		if (isUserAuthenticated) {
+			unregister("name");
+			unregister("lastName");
+			unregister("email");
+			unregister("password");
+			unregister("confirmPassword");
+		}
 	}, [invite, setValue, unregister, resetField]);
 
 	const onsSubmit = async (data: CreateMemberType) => {
 		setIsLoading(true);
 
-		const { confirmPassword, ...rest } = data;
+		let { confirmPassword, ...rest } = data;
 
 		const finalEmail =
 			invite?.type === "EMAIL"
 				? invite.email
 				: rest.email;
 
-		const payload = {
+		let payload = {
 			...rest,
 			email: finalEmail,
 		};
 
+		if (isUserAuthenticated) {
+			payload = {
+				email: invite?.email
+			}
+		}
+
 		try {
 			await api.post(`/invites/${inviteId}/accept`, payload);
 
-			await api.post(`/auth/verification`, {
-				email: payload.email
-			});
+			if (!isUserAuthenticated) {
+				await api.post(`/auth/verification`, {
+					email: payload.email
+				});
+			}
 		} finally {
 			setIsLoading(false);
 			resetField("password");
 			resetField("confirmPassword");
 
-			navigate(`/auth/verify-email?email=${finalEmail ?? ""}`);
+			if (isUserAuthenticated) {
+				toast.success(`Parabéns agora você virou membro da empresa ${invite?.organization.name}`)
+				navigate("/")
+			} else {
+				navigate(`/auth/verify-email?email=${finalEmail ?? ""}`);
+			}
 		}
 	};
 
@@ -172,115 +194,119 @@ export function AcceptInvite() {
 							noValidate
 							className="space-y-3"
 						>
-							<div className="flex gap-2">
-								<FieldGroup>
-									<Controller
-										name="name"
-										control={control}
-										render={({ field, fieldState }) => (
-											<Field data-invalid={fieldState.invalid}>
-												<FieldLabel>Nome</FieldLabel>
-												<Input
-													{...field}
-													id="name"
-													aria-invalid={fieldState.invalid}
-													placeholder="Seu nome"
-													autoComplete="off"
-												/>
-												{fieldState.invalid && (
-													<FieldError errors={[fieldState.error]} />
+							{!isUserAuthenticated && (
+								<>
+									<div className="flex gap-2">
+										<FieldGroup>
+											<Controller
+												name="name"
+												control={control}
+												render={({ field, fieldState }) => (
+													<Field data-invalid={fieldState.invalid}>
+														<FieldLabel>Nome</FieldLabel>
+														<Input
+															{...field}
+															id="name"
+															aria-invalid={fieldState.invalid}
+															placeholder="Seu nome"
+															autoComplete="off"
+														/>
+														{fieldState.invalid && (
+															<FieldError errors={[fieldState.error]} />
+														)}
+													</Field>
 												)}
-											</Field>
-										)}
-									/>
-								</FieldGroup>
-								<FieldGroup>
-									<Controller
-										name="lastName"
-										control={control}
-										render={({ field, fieldState }) => (
-											<Field data-invalid={fieldState.invalid}>
-												<FieldLabel>Sobrenome</FieldLabel>
-												<Input
-													{...field}
-													id="lastName"
-													aria-invalid={fieldState.invalid}
-													placeholder="Seu sobrenome"
-													autoComplete="off"
-												/>
-												{fieldState.invalid && (
-													<FieldError errors={[fieldState.error]} />
+											/>
+										</FieldGroup>
+										<FieldGroup>
+											<Controller
+												name="lastName"
+												control={control}
+												render={({ field, fieldState }) => (
+													<Field data-invalid={fieldState.invalid}>
+														<FieldLabel>Sobrenome</FieldLabel>
+														<Input
+															{...field}
+															id="lastName"
+															aria-invalid={fieldState.invalid}
+															placeholder="Seu sobrenome"
+															autoComplete="off"
+														/>
+														{fieldState.invalid && (
+															<FieldError errors={[fieldState.error]} />
+														)}
+													</Field>
 												)}
-											</Field>
-										)}
-									/>
-								</FieldGroup>
-							</div>
-							{shouldAskEmail && (
-								<FieldGroup>
-									<Controller
-										name="email"
-										control={control}
-										render={({ field, fieldState }) => (
-											<Field data-invalid={fieldState.invalid}>
-												<FieldLabel>Email</FieldLabel>
-												<Input
-													{...field}
-													id="email"
-													aria-invalid={fieldState.invalid}
-													placeholder="joao.silva@dominio.com"
-													autoComplete="off"
-												/>
-												{fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-											</Field>
-										)}
-									/>
-								</FieldGroup>
+											/>
+										</FieldGroup>
+									</div>
+									{shouldAskEmail && (
+										<FieldGroup>
+											<Controller
+												name="email"
+												control={control}
+												render={({ field, fieldState }) => (
+													<Field data-invalid={fieldState.invalid}>
+														<FieldLabel>Email</FieldLabel>
+														<Input
+															{...field}
+															id="email"
+															aria-invalid={fieldState.invalid}
+															placeholder="joao.silva@dominio.com"
+															autoComplete="off"
+														/>
+														{fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+													</Field>
+												)}
+											/>
+										</FieldGroup>
+									)}
+									<FieldGroup>
+										<Controller
+											name="password"
+											control={control}
+											render={({ field, fieldState }) => (
+												<Field data-invalid={fieldState.invalid}>
+													<FieldLabel>Senha</FieldLabel>
+													<Input
+														{...field}
+														id="password"
+														aria-invalid={fieldState.invalid}
+														placeholder="Mínimo 6 caracteres"
+														type="password"
+														autoComplete="off"
+													/>
+													{fieldState.invalid && (
+														<FieldError errors={[fieldState.error]} />
+													)}
+												</Field>
+											)}
+										/>
+									</FieldGroup>
+									<FieldGroup>
+										<Controller
+											name="confirmPassword"
+											control={control}
+											render={({ field, fieldState }) => (
+												<Field data-invalid={fieldState.invalid}>
+													<FieldLabel>Confirmar Senha</FieldLabel>
+													<Input
+														{...field}
+														id="confirmPassword"
+														aria-invalid={fieldState.invalid}
+														placeholder="Confirme sua senha"
+														type="password"
+														autoComplete="off"
+													/>
+													{fieldState.invalid && (
+														<FieldError errors={[fieldState.error]} />
+													)}
+												</Field>
+											)}
+										/>
+									</FieldGroup>
+								</>
 							)}
-							<FieldGroup>
-								<Controller
-									name="password"
-									control={control}
-									render={({ field, fieldState }) => (
-										<Field data-invalid={fieldState.invalid}>
-											<FieldLabel>Senha</FieldLabel>
-											<Input
-												{...field}
-												id="password"
-												aria-invalid={fieldState.invalid}
-												placeholder="Mínimo 6 caracteres"
-                        type="password"
-												autoComplete="off"
-											/>
-											{fieldState.invalid && (
-												<FieldError errors={[fieldState.error]} />
-											)}
-										</Field>
-									)}
-								/>
-							</FieldGroup>
-							<FieldGroup>
-								<Controller
-									name="confirmPassword"
-									control={control}
-									render={({ field, fieldState }) => (
-										<Field data-invalid={fieldState.invalid}>
-											<FieldLabel>Confirmar Senha</FieldLabel>
-											<Input
-												{...field}
-												id="confirmPassword"
-												aria-invalid={fieldState.invalid}
-												placeholder="Confirme sua senha"
-                        type="password"
-												autoComplete="off"
-											/>
-											{fieldState.invalid && (
-												<FieldError errors={[fieldState.error]} />
-											)}
-										</Field>
-									)}
-								/>
-							</FieldGroup>
 							<div className="space-y-2">
 								<Button
 									type="submit"

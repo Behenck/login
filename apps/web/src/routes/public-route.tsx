@@ -5,9 +5,9 @@ import { isAuthenticated } from "@/auth/auth";
 export function PublicRoute() {
 	const isUserAuthenticated = isAuthenticated()
 
-	if (isUserAuthenticated) {
-	  return <Navigate to="/" replace />;
-	}
+	// if (isUserAuthenticated) {
+	//   return <Navigate to="/" replace />;
+	// }
 
 	return (
 		<AuthLayout>

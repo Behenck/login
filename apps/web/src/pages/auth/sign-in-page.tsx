@@ -50,6 +50,9 @@ export function SignInPage() {
 			const response = await api.post("/sessions/password", data);
 
 			Cookies.set("token", response.data.accessToken);
+
+			const profile = await api.get("/profile");
+			Cookies.set("org", profile.data.user.organization.slug);
 			setSuccess(true);
 		} catch (error) {
 			toast.error(

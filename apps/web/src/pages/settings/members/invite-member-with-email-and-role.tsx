@@ -1,3 +1,4 @@
+import { getCurrentOrg } from "@/auth/auth";
 import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
@@ -41,8 +42,8 @@ export function InviteMemberWithEmailAndRole() {
 		setIsLoading(true);
 
 		try {
-			const organizationDomain = "finax-gi";
-			await api.post(`/organizations/${organizationDomain}/invites`, data)
+			const organizationSlug = getCurrentOrg()
+			await api.post(`/organizations/${organizationSlug}/invites`, data)
 			setIsLoading(false);
 			reset({ email: "", role: data.role }); 
 

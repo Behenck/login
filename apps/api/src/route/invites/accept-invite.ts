@@ -18,7 +18,7 @@ export async function acceptInvite(app: FastifyInstance) {
         }),
         body: z.object({
           name: z.string().optional(),
-          email: z.string().email().optional(),
+          email: z.email(),
           lastName: z.string().optional(),
           password: z.string().min(6).optional(),
         }),

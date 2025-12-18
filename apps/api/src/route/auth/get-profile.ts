@@ -18,7 +18,12 @@ export async function getProfile (app: FastifyInstance) {
             name: z.string().nullable(),
             email: z.email(),
             avatarUrl: z.url().nullable(),
-            organizationId: z.uuid(),
+            organization: z.object({
+              id: z.uuid(),
+              name: z.string(),
+              slug: z.string().nullable(),
+              avatarUrl: z.url().nullable(),
+            })
           })
         })
       }
@@ -38,8 +43,9 @@ export async function getProfile (app: FastifyInstance) {
             organization: {
               select: {
                 id: true,
-                domain: true,
+                slug: true,
                 name: true,
+                avatarUrl: true,
               }
             }
           },
@@ -58,16 +64,25 @@ export async function getProfile (app: FastifyInstance) {
       throw new BadRequestError("User not found.")
     }
 
+    if (!user.member_on.length) {
+      throw new BadRequestError("User has no active default organization.")
+    }
+
+    const defaultOrg = user.member_on[0].organization
+
     const userResponse = {
       id: user.id,
       name: user.name,
       email: user.email,
       avatarUrl: user.avatarUrl,
       organization: {
-        id: user.member_on.organization.id
+        id: defaultOrg.id,
+        name: defaultOrg.name,
+        slug: defaultOrg.slug,
+        avatarUrl: defaultOrg.avatarUrl,
       }      
     }
 
-    return reply.send({user})
+    return reply.send({ user: userResponse })
   })
 }
