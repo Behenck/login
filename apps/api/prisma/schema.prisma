@@ -116,6 +116,7 @@ model Member {
   user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId         String       @map("user_id")
   active         Boolean      @default(true)
+  isDefault      Boolean      @default(false) @map("is_default")
 
   @@unique([organizationId, userId])
   @@map("members")
@@ -131,8 +132,7 @@ model Organization {
   ownerId                  String   @map("owner_id")
   createdAt                DateTime @default(now()) @map("created_at")
   updatedAt                DateTime @updatedAt @map("updated_at")
-  owner                    User?    @relation(fields: [userId], references: [id])
-  userId                   String?
+  owner                    User?    @relation(fields: [ownerId], references: [id])
 
   invites Invite[]
   members Member[]

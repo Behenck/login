@@ -5,8 +5,6 @@ import { hash } from "bcryptjs"
 
 import { prisma } from "@/lib/prisma"
 import { BadRequestError } from "../_errors/bad-request-error"
-import { generateOTP } from "@/utils/generate-otp"
-import { Resend } from "resend"
 
 export async function acceptInvite(app: FastifyInstance) {
   app.withTypeProvider<ZodTypeProvider>().post(
@@ -69,17 +67,12 @@ export async function acceptInvite(app: FastifyInstance) {
 
         user = await prisma.user.create({
           data: {
-            email: finalEmail,              // ✅ aqui também
+            email: finalEmail,          
             name: fullName || null,
             passwordHash,
           },
         })
       }
-
-      // OTP
-      const otp = generateOTP()
-      const otpHash = await hash(otp, 6)
-      const expiresAt = new Date(Date.now() + 5 * 60 * 1000) //5min
 
       await prisma.$transaction([
         prisma.member.create({
@@ -91,46 +84,10 @@ export async function acceptInvite(app: FastifyInstance) {
           },
         }),
 
-        prisma.token.updateMany({
-          where: {
-            userId: user.id,
-            type: "EMAIL_VERIFICATION",
-            usedAt: null,
-          },
-          data: { usedAt: new Date() },
-        }),
-
-        prisma.token.create({
-          data: {
-            type: "EMAIL_VERIFICATION",
-            token: otpHash,
-            expiresAt,
-            userId: user.id,
-          },
-        }),
-
         prisma.invite.delete({
           where: { id: invite.id },
         }),
       ])
-
-      const resend = new Resend(process.env.RESEND_API_KEY);
-
-      const { error } = 
-        await resend.emails.send({
-          to: ["denilsontrespa10@gmail.com"],
-          template: {
-            id: "verification-code",
-            variables: {
-              otpCode: otp,
-            }
-          }
-        });
-
-      if (error) {
-        request.log.error({ error }, "Resend failed to send email")
-        throw new BadRequestError(error.message)
-      }
 
       return reply.status(204).send()
     },

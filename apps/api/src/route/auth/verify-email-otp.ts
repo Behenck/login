@@ -6,7 +6,7 @@ import { BadRequestError } from "../_errors/bad-request-error";
 import { compare } from "bcryptjs";
 
 export async function verifyEmailOTP (app: FastifyInstance) {
-  app.withTypeProvider<ZodTypeProvider>().post("/sessions/verify-email", {
+  app.withTypeProvider<ZodTypeProvider>().post("/auth/verify-email", {
     schema: {
       tags: ["auth"],
       summary: "Get code verify email",

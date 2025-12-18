@@ -21,7 +21,7 @@ export async function authenticateWithPassword(app: FastifyInstance) {
       response: {
         200: z.object({
           accessToken: z.string(),
-          refreshToken: z.string()
+          refreshToken: z.string(),
         }),
         401: z.object({
           message: z.string()
@@ -55,7 +55,7 @@ export async function authenticateWithPassword(app: FastifyInstance) {
 
     if (!userFromEmail.emailVerifiedAt) {
       return reply.status(403).send({
-        message: "Para acessar o sistema, primeiro conclua a verificação do seu e-mail, ou clique em 'Esqueci minha senha'"
+        message: "Para acessar o sistema, primeiro conclua a verificação."
       })
     }
 

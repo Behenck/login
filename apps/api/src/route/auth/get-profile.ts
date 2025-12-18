@@ -17,7 +17,8 @@ export async function getProfile (app: FastifyInstance) {
             id: z.uuid(),
             name: z.string().nullable(),
             email: z.email(),
-            avatarUrl: z.url().nullable()
+            avatarUrl: z.url().nullable(),
+            organizationId: z.uuid(),
           })
         })
       }
@@ -31,7 +32,22 @@ export async function getProfile (app: FastifyInstance) {
         id: true,
         name: true,
         email: true,
-        avatarUrl: true
+        avatarUrl: true,
+        member_on: {
+          select: {
+            organization: {
+              select: {
+                id: true,
+                domain: true,
+                name: true,
+              }
+            }
+          },
+          where: {
+            isDefault: true,
+            active: true,
+          }
+        }
       },
       where: {
         id: userId
@@ -40,6 +56,16 @@ export async function getProfile (app: FastifyInstance) {
 
     if (!user) {
       throw new BadRequestError("User not found.")
+    }
+
+    const userResponse = {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      avatarUrl: user.avatarUrl,
+      organization: {
+        id: user.member_on.organization.id
+      }      
     }
 
     return reply.send({user})
