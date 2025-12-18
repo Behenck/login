@@ -1,15 +1,15 @@
 import { Navigate, Outlet, useLocation } from "react-router-dom";
-import Cookies from "js-cookie";
 import { MainLayout } from "@/components/layouts/main-layout";
+import { isAuthenticated } from "@/auth/auth";
 
 export function PrivateRoute() {
-	const token = Cookies.get("token");
+	const isUserAuthenticated = isAuthenticated()
 	const location = useLocation();
 
-	if (!token) {
+	if (!isUserAuthenticated) {
 		return (
 			<Navigate
-				to="/login"
+				to="/auth/sign-in"
 				replace
 				state={{ from: location }} // se quiser usar depois pra voltar
 			/>

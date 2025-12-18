@@ -115,7 +115,7 @@ export function PasswordRecoverPage() {
 					</Button>
 
 					<p className="text-sm text-muted-foreground text-center">
-						Lembrou da senha? <Link to="/login" className="font-medium text-gray-100 hover:text-gra-200 hover:underline">Fazer login</Link>
+						Lembrou da senha? <Link to="/auth/sign-in" className="font-medium text-gray-100 hover:text-gra-200 hover:underline">Fazer login</Link>
 					</p>
 			</form>
 		</AuthLayout>

@@ -6,14 +6,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import { api } from "@/lib/axios";
 import Cookies from "js-cookie";
-import { Link, Navigate } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import { Mail, Lock, Loader2 } from "lucide-react";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { toast } from "sonner";
 import Logo from "@/assets/finax-logo.svg";
 import { AuthLayout } from "@/components/layouts/auth-layout";
 
-const LoginSchema = z
+const SignInSchema = z
 	.object({
 		email: z.email({ error: "Email inválido!" }),
 		password: z
@@ -22,33 +22,32 @@ const LoginSchema = z
 	})
 	.required();
 
-export type LoginType = z.infer<typeof LoginSchema>;
+export type SignInType = z.infer<typeof SignInSchema>;
 
-export function LoginPage() {
+export function SignInPage() {
 	const [isLoading, setIsLoading] = useState<boolean>(false);
 	const [success, setSuccess] = useState<boolean>(false);
+	const navigate = useNavigate()
 
 	const {
 		handleSubmit,
 		resetField,
 		control,
-		watch
-	} = useForm<LoginType>({ 
-			resolver: zodResolver(LoginSchema),
+		watch,
+	} = useForm<SignInType>({ 
+			resolver: zodResolver(SignInSchema),
 			defaultValues: {
 				password: ""
 			}
 		});
 
-	const email = watch("email")
+		const email = watch("email")
 
-	const onsSubmit = async (data: LoginType) => {
+	const onsSubmit = async (data: SignInType) => {
 		setIsLoading(true);
 
 		try {
-			const response = await api.post("/sessions/password", data, {
-				withCredentials: true,
-			});
+			const response = await api.post("/sessions/password", data);
 
 			Cookies.set("token", response.data.accessToken);
 			setSuccess(true);
@@ -57,6 +56,14 @@ export function LoginPage() {
 				(error as any)?.response?.data?.message ??
 					"Erro ao entrar. Tente novamente.",
 			);
+
+			if ((error as any)?.response?.status === 403) {
+				await api.post(`/auth/verification`, {
+					email
+				});
+
+				return navigate(`/auth/verify-email?email=${data.email}`)
+			}
 		} finally {
 			setIsLoading(false);
 			resetField("password");

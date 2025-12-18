@@ -61,7 +61,7 @@ export function PasswordResetPage() {
 
 			toast.success("Senha redefinida com sucesso!")
 
-			navigate("/login")
+			navigate("/auth/sign-in")
 			setSuccess(true);
 		} catch (error) {
 			toast.error(
@@ -160,7 +160,7 @@ export function PasswordResetPage() {
 					</Button>
 
 					<Button variant="outline" className="cursor-pointer w-full" asChild>
-						<Link to="/login">
+						<Link to="/auth/sign-in">
 							<ArrowLeft />
 							Voltar ao login
 						</Link>

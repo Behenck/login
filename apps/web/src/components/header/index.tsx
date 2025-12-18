@@ -1,8 +1,10 @@
-import { Moon } from "lucide-react";
+import { LogOut, Moon } from "lucide-react";
 import { Navbar } from "./navbar";
 import Logo from "@/assets/finax-logo.svg";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { ToggleTheme } from "../theme";
+import { Link } from "react-router-dom";
+import { Button } from "../ui/button";
 
 export function Header() {
 	return (
@@ -14,6 +16,11 @@ export function Header() {
 				</div>
 				<div className="flex gap-4 items-center">
 					<ToggleTheme />
+					<Button variant="ghost" size="icon" className="cursor-pointer" asChild>
+						<Link to="auth/sign-out">
+							<LogOut />
+						</Link>
+					</Button>
 					<Avatar>
 						<AvatarImage src="https://github.com/behenck.png" />
 						<AvatarFallback>DB</AvatarFallback>

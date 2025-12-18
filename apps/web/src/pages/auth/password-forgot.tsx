@@ -85,7 +85,7 @@ export function PasswordForgotPage() {
 						)}
 					</Button>
 					<Button asChild className="cursor-pointer w-full text-green-600 hover:text-green-700 hover:underline" variant="link">
-						<Link to="/login">
+						<Link to="/auth/sign-in">
 							<ArrowLeft />
 							Voltar para o login
 						</Link>

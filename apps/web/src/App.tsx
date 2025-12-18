@@ -1,4 +1,4 @@
-import { LoginPage } from "./pages/auth/login-page";
+import { SignInPage } from "./pages/auth/sign-in-page";
 import { Route, Routes, Navigate } from "react-router-dom";
 import { HomePage } from "./pages/home";
 import { PrivateRoute } from "./routes/private-route";
@@ -13,18 +13,20 @@ import { VerifyEmailOTP } from "./pages/auth/verify-email-otp";
 import { PasswordRecoverPage } from "./pages/auth/password-recover";
 import { PasswordResetPage } from "./pages/auth/password-reset";
 import { PasswordForgotPage } from "./pages/auth/password-forgot";
+import { SignOutPage } from "./pages/auth/sign-out-page";
 
 export function App() {
 	return (
 		<Routes>
 			{/* Rotas públicas */}
 			<Route element={<PublicRoute />}>
-				<Route path="login" element={<LoginPage />} />
+				<Route path="auth/sign-in" element={<SignInPage />} />
+				<Route path="auth/sign-out" element={<SignOutPage />} />
 				<Route path="password/recover" element={<PasswordRecoverPage />} />
 				<Route path="password/reset" element={<PasswordResetPage />} />
 				<Route path="password/forgot" element={<PasswordForgotPage />} />
 				<Route
-					path="verify-email"
+					path="auth/verify-email"
 					element={<VerifyEmailOTP />}
 				/>
 				

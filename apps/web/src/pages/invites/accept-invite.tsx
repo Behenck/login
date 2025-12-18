@@ -125,12 +125,16 @@ export function AcceptInvite() {
 
 		try {
 			await api.post(`/invites/${inviteId}/accept`, payload);
+
+			await api.post(`/auth/verification`, {
+				email: payload.email
+			});
 		} finally {
 			setIsLoading(false);
 			resetField("password");
 			resetField("confirmPassword");
 
-			navigate(`/verify-email?email=${finalEmail ?? ""}`);
+			navigate(`/auth/verify-email?email=${finalEmail ?? ""}`);
 		}
 	};
 

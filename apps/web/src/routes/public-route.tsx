@@ -1,13 +1,13 @@
 import { Navigate, Outlet } from "react-router-dom";
-import Cookies from "js-cookie";
 import { AuthLayout } from "@/components/layouts/auth-layout";
+import { isAuthenticated } from "@/auth/auth";
 
 export function PublicRoute() {
-	const token = Cookies.get("token");
+	const isUserAuthenticated = isAuthenticated()
 
-	// if (token) {
-	//   return <Navigate to="/" replace />;
-	// }
+	if (isUserAuthenticated) {
+	  return <Navigate to="/" replace />;
+	}
 
 	return (
 		<AuthLayout>

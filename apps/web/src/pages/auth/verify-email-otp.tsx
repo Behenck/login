@@ -14,6 +14,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { api } from "@/lib/axios";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { AuthLayout } from "@/components/layouts/auth-layout";
+import { toast } from "sonner";
 
 const VerifySchema = z.object({
   code: z.string().regex(/^\d{6}$/, "Informe os 6 dígitos."),
@@ -29,7 +30,7 @@ export function VerifyEmailOTP() {
 	const {
     control,
     handleSubmit,
-    formState: { isSubmitting, errors },
+    formState: { isSubmitting },
   } = useForm<VerifyForm>({
     resolver: zodResolver(VerifySchema),
     defaultValues: { code: "" },
@@ -38,10 +39,17 @@ export function VerifyEmailOTP() {
 	async function onSubmit(data: VerifyForm) {
     if (!email) return;
 
-    // Exemplo de chamada
-    await api.post("/sessions/verify-email", { email, code: data.code })
-
-    navigate("/");
+    try {
+			await api.post("/auth/verify-email", { email, code: data.code })
+			
+			toast.success("Verificação feita com sucesso!")
+			navigate("/");
+		} catch (error) {
+			toast.error(
+				(error as any)?.response?.data?.message ??
+					"Erro ao entrar. Tente novamente.",
+			);
+		}
   }
 
 	return (
