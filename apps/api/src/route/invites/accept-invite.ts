@@ -79,7 +79,7 @@ export async function acceptInvite(app: FastifyInstance) {
       // OTP
       const otp = generateOTP()
       const otpHash = await hash(otp, 6)
-      const expiresAt = new Date(Date.now() + 15 * 60 * 1000)
+      const expiresAt = new Date(Date.now() + 5 * 60 * 1000) //5min
 
       await prisma.$transaction([
         prisma.member.create({

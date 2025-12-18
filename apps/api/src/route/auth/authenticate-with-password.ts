@@ -55,7 +55,7 @@ export async function authenticateWithPassword(app: FastifyInstance) {
 
     if (!userFromEmail.emailVerifiedAt) {
       return reply.status(403).send({
-        message: "Você precisa verificar seu e-mail antes de acessar o sistema."
+        message: "Para acessar o sistema, primeiro conclua a verificação do seu e-mail, ou clique em 'Esqueci minha senha'"
       })
     }
 

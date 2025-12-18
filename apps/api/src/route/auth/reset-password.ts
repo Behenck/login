@@ -4,12 +4,15 @@ import { ZodTypeProvider } from "fastify-type-provider-zod";
 import z from "zod";
 import { UnauthorizedError } from "../_errors/unauthorized-error";
 import { hash } from "bcryptjs";
+import { BadRequestError } from "../_errors/bad-request-error";
+import { Resend } from "resend";
+import { generateOTP } from "@/utils/generate-otp";
 
 export async function resetPassword(app: FastifyInstance) {
   app.withTypeProvider<ZodTypeProvider>().post("/password/reset", {
     schema: {
       tags: ["auth"],
-      summary: "Reset user password (not implemented)",
+      summary: "Reset user password ",
       body: z.object({
         code: z.string(),
         password: z.string().min(6)
@@ -47,7 +50,7 @@ export async function resetPassword(app: FastifyInstance) {
         where: {id: code}
       })
     ])
-    
+   
     return reply.status(200).send()
   }
 )

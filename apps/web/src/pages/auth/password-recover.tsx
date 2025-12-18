@@ -5,12 +5,12 @@ import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import { api } from "@/lib/axios";
-import Cookies from "js-cookie";
-import { Link, Navigate } from "react-router-dom";
-import { Mail, Lock, Loader2 } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { Mail, Loader2, MessageCircleQuestionMark } from "lucide-react";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { toast } from "sonner";
 import Logo from "@/assets/finax-logo.svg";
+import { AuthLayout } from "@/components/layouts/auth-layout";
 
 const PasswordRecoverySchema = z
 	.object({
@@ -20,15 +20,15 @@ const PasswordRecoverySchema = z
 
 export type PasswordRecoveryType = z.infer<typeof PasswordRecoverySchema>;
 
-export function PasswordRecoveryPage() {
+export function PasswordRecoverPage() {
 	const [isLoading, setIsLoading] = useState<boolean>(false);
 	const [success, setSuccess] = useState<boolean>(false);
+	const navigate = useNavigate()
 
 	const {
 		handleSubmit,
-		resetField,
 		control,
-		watch
+		watch,
 	} = useForm<PasswordRecoveryType>({ 
 			resolver: zodResolver(PasswordRecoverySchema),
 		});
@@ -39,16 +39,16 @@ export function PasswordRecoveryPage() {
 		setIsLoading(true);
 
 		try {
-			const response = await api.post("/sessions/password", data, {
-				withCredentials: true,
-			});
+			await api.post("/password/recover", data);
 
-			Cookies.set("token", response.data.accessToken);
+			toast.success("Email de redefinição de senha enviado com sucesso!")
+
+			navigate(`/password/forgot?email=${email}`)
 			setSuccess(true);
 		} catch (error) {
 			toast.error(
 				(error as any)?.response?.data?.message ??
-					"Erro ao entrar. Tente novamente.",
+					"Erro ao enviar email. Tente novamente.",
 			);
 		} finally {
 			setIsLoading(false);
@@ -56,18 +56,16 @@ export function PasswordRecoveryPage() {
 	};
 
 	return (
-		<div className="flex justify-between h-screen">
-			<div className="relative flex-1 flex items-center justify-center">
-				<img src={Logo} className="opacity-20 blur-md" alt="" />
-				{/* <span className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 font-bold text-2xl">Você na frente sempre...</span> */}
-			</div>
-			<div className="w-xl bg-zinc-900 p-8 flex flex-col items-center justify-center">
+		<AuthLayout>
 				<form
 					className="space-y-4 w-full max-w-sm text-white"
 					onSubmit={handleSubmit(onsSubmit)}
 					noValidate
 				>
 					<div className="space-y-3 text-center">
+						<div className="mx-auto bg-zinc-800 w-12 h-12 rounded-full flex items-center justify-center">
+							<MessageCircleQuestionMark className="mx-auto text-green-600" />
+						</div>
 						<h1 className="text-3xl font-semibold tracking-tight">Esqueci minha senha</h1>
 						<p className="text-sm text-muted-foreground">
 							Digite seu email para receber instruções de redefinição de senha.
@@ -100,14 +98,14 @@ export function PasswordRecoveryPage() {
 					</FieldGroup>
 
 					<Button
-						className="w-full hover:opacity-90"
+						className="w-full hover:opacity-90 cursor-pointer"
 						disabled={isLoading || success}
 						type="submit"
 					>
 						{isLoading ? (
 							<span className="flex items-center justify-center gap-2">
 								<Loader2 className="h-4 w-4 animate-spin" />
-								Entrando...
+								Enviando...
 							</span>
 						) : success ? (
 							"Redirecionando..."
@@ -119,8 +117,7 @@ export function PasswordRecoveryPage() {
 					<p className="text-sm text-muted-foreground text-center">
 						Lembrou da senha? <Link to="/login" className="font-medium text-gray-100 hover:text-gra-200 hover:underline">Fazer login</Link>
 					</p>
-				</form>
-			</div>
-		</div>
+			</form>
+		</AuthLayout>
 	);
 }

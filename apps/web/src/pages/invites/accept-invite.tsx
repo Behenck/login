@@ -22,6 +22,7 @@ import {
 	FieldLabel,
 } from "@/components/ui/field";
 import { toast } from "sonner";
+import { AuthLayout } from "@/components/layouts/auth-layout";
 
 const CreateMemberSchema = z
 	.object({
@@ -134,11 +135,7 @@ export function AcceptInvite() {
 	};
 
 	return (
-		<div className="flex justify-between h-screen">
-			<div className="relative flex-1 flex items-center justify-center">
-				<img src={Logo} className="opacity-20 blur-md" alt="" />
-			</div>
-			<div className="w-xl bg-zinc-900 p-8 flex flex-col items-center justify-center">
+		<AuthLayout>
 				{!isLoading && invite ? (
 					<div className="space-y-6 w-full max-w-md text-white">
 						<div className="mx-auto bg-zinc-800 w-12 h-12 rounded-full flex items-center justify-center">
@@ -319,8 +316,7 @@ export function AcceptInvite() {
 							<span className="text-gray-400">Validando convite...</span>
 						</div>
 					</div>
-				)}
-			</div>
-		</div>
+			)}
+		</AuthLayout>
 	);
 }

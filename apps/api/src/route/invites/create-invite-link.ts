@@ -36,7 +36,7 @@ export async function createInviteLink(app: FastifyInstance) {
         throw new UnauthorizedError("Você não tem permissão para criar novos convites.");
       }
 
-      const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000)
+      const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000) //24h
 
       const invite = await prisma.invite.create({
         data: {
